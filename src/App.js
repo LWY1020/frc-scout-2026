@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import teamLogo from './FRC9427-teamloge.jpg'; 
+import seasonLogo from './2026FRC-REBUILT-logo.webp'; 
 
 function App() {
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [score, setScore] = useState(0);
   const [selectedRegional, setSelectedRegional] = useState(null);
-  const [stage, setStage] = useState(null);
+  const [stage, setStage] = useState(null); // 最終確定的階段
+  const [tempStage, setTempStage] = useState(null); // 用來追蹤「當前點選」的高亮狀態
   const [showPassword, setShowPassword] = useState(false);
   const TEAM_PASSWORD = "FRC9427";
 
@@ -19,7 +21,15 @@ function App() {
     }
   };
 
-  // 第一層：登入畫面 (中文提示 + 位置對調版)
+  // 點擊子選項時的處理邏輯
+  const confirmStage = (stageName) => {
+    setTempStage(stageName); // 立即觸發高亮顏色變化
+    setTimeout(() => {
+        setStage(stageName); // 延遲跳轉，讓使用者看清選擇
+    }, 250);
+  };
+
+  // 第一層：登入畫面
   if (!isLoggedIn) {
     return (
       <div style={styles.container}>
@@ -29,11 +39,7 @@ function App() {
         </header>
 
         <div style={styles.loginBoxLarge}>
-          
-          {/* 1. Team 9427 移至上方 */}
           <h2 style={styles.mainTeamNumberLarge}>Team 9427</h2>
-
-          {/* 2. 密碼輸入框 (提示文字改為中文) */}
           <div style={styles.passwordContainerLarge}>
             <input 
               type={showPassword ? "text" : "password"}
@@ -43,14 +49,15 @@ function App() {
               style={styles.inputLarge}
             />
             <button 
-              type="button"
+              type="button" 
               onClick={() => setShowPassword(!showPassword)} 
               style={styles.eyeButtonLarge}
             >
+              {/* 眼睛圖案：確保 path 完整，並根據 showPassword 切換 */}
               {showPassword ? (
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                  <circle cx="12" cy="12" r="3" fill="#666" />
+                  <circle cx="12" cy="12" r="3" />
                 </svg>
               ) : (
                 <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -60,25 +67,24 @@ function App() {
               )}
             </button>
           </div>
-
-          {/* 3. Log in 按鈕 */}
           <button onClick={handleLogin} style={styles.startButtonLarge}>Log in</button>
         </div>
       </div>
     );
   }
 
-  // 第二層：賽事選擇 (保持原樣)
+  // 第二層：賽事選擇 (包含高亮邏輯)
   if (!stage) {
     return (
       <div style={styles.container}>
         <div style={styles.brandTitleContainer}>
-            <div style={styles.brandYear}>2026</div>
-            <div style={styles.brandText}>REBUILT</div>
+            <img src={seasonLogo} alt="2026 Logo" style={styles.seasonLogoSmall} />
         </div>
 
         <div style={styles.selectionArea}>
           <h2 style={styles.mainSelectionTitle}>REGION SELECTION</h2>
+          
+          {/* Bosphorus 區域 */}
           <div style={styles.accordionBox}>
             <button 
               onClick={() => setSelectedRegional(selectedRegional === 'Bosphorus' ? null : 'Bosphorus')} 
@@ -88,12 +94,23 @@ function App() {
             </button>
             {selectedRegional === 'Bosphorus' && (
               <div style={styles.subLineArea}>
-                <button onClick={() => setStage('Bosphorus Quals')} style={styles.subButton}>Qualifications</button>
-                <button onClick={() => setStage('Bosphorus Semis')} style={styles.subButton}>Semifinals</button>
+                <button 
+                    onClick={() => confirmStage('Bosphorus Quals')} 
+                    style={tempStage === 'Bosphorus Quals' ? styles.subButtonActive : styles.subButton}
+                >
+                    Qualifications
+                </button>
+                <button 
+                    onClick={() => confirmStage('Bosphorus Semis')} 
+                    style={tempStage === 'Bosphorus Semis' ? styles.subButtonActive : styles.subButton}
+                >
+                    Semifinals
+                </button>
               </div>
             )}
           </div>
 
+          {/* Yeditepe 區域 */}
           <div style={styles.accordionBox}>
             <button 
               onClick={() => setSelectedRegional(selectedRegional === 'Yeditepe' ? null : 'Yeditepe')} 
@@ -103,12 +120,22 @@ function App() {
             </button>
             {selectedRegional === 'Yeditepe' && (
               <div style={styles.subLineArea}>
-                <button onClick={() => setStage('Yeditepe Quals')} style={styles.subButton}>Qualifications</button>
-                <button onClick={() => setStage('Yeditepe Semis')} style={styles.subButton}>Semifinals</button>
+                <button 
+                    onClick={() => confirmStage('Yeditepe Quals')} 
+                    style={tempStage === 'Yeditepe Quals' ? styles.subButtonActive : styles.subButton}
+                >
+                    Qualifications
+                </button>
+                <button 
+                    onClick={() => confirmStage('Yeditepe Semis')} 
+                    style={tempStage === 'Yeditepe Semis' ? styles.subButtonActive : styles.subButton}
+                >
+                    Semifinals
+                </button>
               </div>
             )}
           </div>
-          <button onClick={() => setIsLoggedIn(false)} style={styles.logoutButton}>Log Out</button>
+          <button onClick={() => {setIsLoggedIn(false); setTempStage(null);}} style={styles.logoutButton}>Log Out</button>
         </div>
       </div>
     );
@@ -118,8 +145,7 @@ function App() {
   return (
     <div style={styles.container}>
       <div style={styles.brandTitleContainer}>
-          <div style={styles.brandYear}>2026</div>
-          <div style={styles.brandText}>REBUILT</div>
+          <img src={seasonLogo} alt="2026 Logo" style={styles.seasonLogoSmall} />
       </div>
       <div style={styles.selectionArea}>
         <h2 style={{ color: '#FFD700', fontSize: '32px', marginBottom: '10px' }}>{stage}</h2>
@@ -129,112 +155,40 @@ function App() {
           <br/><br/>
           <button onClick={() => setScore(0)} style={styles.backButton}>Reset</button>
         </div>
-        <button onClick={() => setStage(null)} style={styles.backButton}>← Back to Menu</button>
+        <button onClick={() => {setStage(null); setTempStage(null);}} style={styles.backButton}>← Back to Menu</button>
       </div>
     </div>
   );
 }
 
 const styles = {
-  container: {
-    textAlign: 'center',
-    backgroundColor: '#000000',
-    minHeight: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    fontFamily: 'Arial, sans-serif',
-    padding: '20px',
-    position: 'relative'
-  },
+  container: { textAlign: 'center', backgroundColor: '#000', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white', fontFamily: 'Arial', padding: '20px', position: 'relative' },
   header: { marginBottom: '40px' },
-  mainLogoLarge: { 
-    width: '220px', 
-    height: 'auto', 
-    marginBottom: '20px',
-    filter: 'drop-shadow(0px 0px 20px rgba(255, 222, 3, 0.4))' 
-  },
-  mainTeamNameLarge: { 
-    fontSize: '64px', 
-    margin: '0', 
-    color: '#ffffff', 
-    letterSpacing: '12px',
-    fontWeight: '900'
-  },
-  loginBoxLarge: { 
-    width: '100%',
-    maxWidth: '480px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '40px' 
-  },
-  mainTeamNumberLarge: { 
-    color: '#ffde03', 
-    margin: '0', 
-    fontSize: '48px', 
-    fontWeight: '900',
-    letterSpacing: '5px',
-    textShadow: '0px 0px 15px rgba(255, 222, 3, 0.4)'
-  },
-  passwordContainerLarge: { 
-    position: 'relative', 
-    width: '100%', 
-    display: 'flex', 
-    alignItems: 'center' 
-  },
-  inputLarge: {
-    padding: '22px',
-    paddingRight: '60px',
-    fontSize: '24px',
-    borderRadius: '15px',
-    border: '3px solid #ffde03',
-    width: '100%',
-    textAlign: 'center',
-    backgroundColor: '#0a0a0a',
-    color: '#ffffff',
-    outline: 'none',
-    boxShadow: 'inset 0px 0px 15px rgba(255, 222, 3, 0.15)'
-  },
-  eyeButtonLarge: {
-    position: 'absolute',
-    right: '20px',
-    background: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center'
-  },
-  startButtonLarge: {
-    width: '260px', 
-    height: '75px',
-    fontSize: '26px',
-    fontWeight: 'bold',
-    backgroundColor: '#ffde03', 
-    color: 'black',
-    border: 'none',
-    borderRadius: '40px', 
-    cursor: 'pointer',
-    boxShadow: '0px 10px 30px rgba(255, 222, 3, 0.4)',
-    textTransform: 'uppercase',
-    letterSpacing: '2px',
-    transition: 'transform 0.2s'
-  },
-  // --- 賽事選擇與計分樣式 ---
-  brandTitleContainer: { position: 'absolute', top: '30px', left: '30px', textAlign: 'left', zIndex: 10 },
-  brandYear: { fontSize: '42px', fontWeight: '900', color: '#FFD700', letterSpacing: '2px', lineHeight: '1' },
-  brandText: { fontSize: '26px', fontWeight: '700', color: '#ffffff', marginTop: '5px' },
+  mainLogoLarge: { width: '220px', height: 'auto', marginBottom: '20px', filter: 'drop-shadow(0px 0px 20px rgba(255, 222, 3, 0.4))' },
+  mainTeamNameLarge: { fontSize: '64px', margin: '0', color: '#fff', letterSpacing: '12px', fontWeight: '900' },
+  loginBoxLarge: { width: '100%', maxWidth: '480px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '40px' },
+  mainTeamNumberLarge: { color: '#ffde03', fontSize: '48px', fontWeight: '900', letterSpacing: '5px' },
+  inputLarge: { padding: '22px', paddingRight: '60px', fontSize: '24px', borderRadius: '15px', border: '3px solid #ffde03', width: '100%', textAlign: 'center', backgroundColor: '#0a0a0a', color: '#fff', outline: 'none' },
+  passwordContainerLarge: { position: 'relative', width: '100%', display: 'flex', alignItems: 'center' },
+  eyeButtonLarge: { position: 'absolute', right: '20px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' },
+  startButtonLarge: { width: '260px', height: '75px', fontSize: '26px', fontWeight: 'bold', backgroundColor: '#ffde03', color: 'black', borderRadius: '40px', border: 'none', cursor: 'pointer' },
+  brandTitleContainer: { position: 'absolute', top: '20px', left: '20px', zIndex: 10 },
+  seasonLogoSmall: { width: '120px', height: 'auto' },
   selectionArea: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', width: '100%' },
-  mainSelectionTitle: { color: '#ffffff', marginBottom: '40px', fontSize: '38px', fontWeight: 'bold' },
+  mainSelectionTitle: { color: '#fff', marginBottom: '40px', fontSize: '38px', fontWeight: 'bold' },
   accordionBox: { width: '380px' },
   bigTechButton: { width: '100%', padding: '25px 20px', fontSize: '20px', fontWeight: '900', color: '#00d4ff', border: '2px solid #00d4ff', backgroundColor: 'transparent', borderRadius: '15px' },
   bigTechButtonActive: { width: '100%', padding: '25px 20px', fontSize: '20px', fontWeight: '900', backgroundColor: '#00d4ff', color: '#000', borderRadius: '15px 15px 0 0' },
-  subLineArea: { display: 'flex', justifyContent: 'space-around', padding: '25px 15px', backgroundColor: 'rgba(0, 212, 255, 0.05)', border: '2px solid #00d4ff', borderTop: 'none', borderRadius: '0 0 15px 15px' },
-  subButton: { padding: '12px 20px', backgroundColor: '#333', color: '#fff', border: '1px solid #555', borderRadius: '8px' },
+  subLineArea: { display: 'flex', justifyContent: 'space-around', padding: '25px 15px', backgroundColor: 'rgba(0, 212, 255, 0.05)', border: '2px solid #00d4ff', borderTop: 'none', borderRadius: '0 0 15px 15px', gap: '10px' },
+  
+  // 普通子按鈕
+  subButton: { flex: 1, padding: '15px 10px', backgroundColor: '#1a1a1a', color: '#00d4ff', border: '1px solid #00d4ff', borderRadius: '8px', fontSize: '16px', fontWeight: 'bold' },
+  
+  // 被點選時的高亮按鈕
+  subButtonActive: { flex: 1, padding: '15px 10px', backgroundColor: '#00d4ff', color: '#000', border: '1px solid #fff', borderRadius: '8px', fontSize: '16px', fontWeight: 'bold', boxShadow: '0px 0px 15px #00d4ff' },
+  
   scoreCircle: { width: '130px', height: '130px', borderRadius: '50%', backgroundColor: '#ffde03', color: 'black', fontSize: '36px', fontWeight: 'bold', border: 'none' },
-  backButton: { backgroundColor: 'transparent', color: '#888', border: 'none', marginTop: '20px' },
+  backButton: { backgroundColor: 'transparent', color: '#888', border: 'none', marginTop: '20px', cursor: 'pointer' },
   logoutButton: { marginTop: '50px', backgroundColor: 'transparent', color: '#888', border: '1px solid #888', padding: '10px 25px', borderRadius: '5px' }
 };
 
