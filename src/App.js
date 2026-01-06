@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import teamLogo from './FRC9427-teamloge.jpg'; 
 import seasonLogo from './2026FRC-REBUILT-logo.webp'; 
 
@@ -17,6 +17,25 @@ function App() {
   const [alliancePos, setAlliancePos] = useState(""); 
   const [teamNumber, setTeamNumber] = useState("");
   const [isScoutingStarted, setIsScoutingStarted] = useState(false);
+
+  // 徹底清除手機端所有白邊的 CSS 注入
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = `
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        overflow-x: hidden !important;
+        background-color: #000 !important;
+      }
+      * {
+        box-sizing: border-box !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }, []);
 
   const TEAM_PASSWORD = "FRC9427";
 
@@ -147,7 +166,21 @@ function App() {
 }
 
 const styles = {
-  container: { textAlign: 'center', backgroundColor: '#000', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white', padding: '20px', position: 'relative' },
+  container: { 
+    textAlign: 'center', 
+    backgroundColor: '#000', 
+    minHeight: '100vh', 
+    width: '100%',
+    margin: 0,
+    padding: '20px',
+    display: 'flex', 
+    flexDirection: 'column', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    color: 'white', 
+    position: 'relative',
+    overflow: 'hidden'
+  },
   header: { marginBottom: '40px' },
   mainLogoLarge: { width: '180px', height: 'auto', marginBottom: '20px' },
   mainTeamNameLarge: { fontSize: '50px', margin: '0', color: '#fff', letterSpacing: '8px', fontWeight: '900' },
@@ -161,21 +194,16 @@ const styles = {
   seasonLogoSmall: { width: '100px', height: 'auto' },
   selectionArea: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', width: '100%' },
   mainSelectionTitle: { color: '#fff', marginBottom: '30px', fontSize: '32px', fontWeight: 'bold' },
-  accordionBox: { width: '350px' },
+  accordionBox: { width: '100%', maxWidth: '350px' },
   bigTechButton: { width: '100%', padding: '20px', fontSize: '18px', fontWeight: '900', color: '#00d4ff', border: '2px solid #00d4ff', backgroundColor: 'transparent', borderRadius: '12px' },
   bigTechButtonActive: { width: '100%', padding: '20px', fontSize: '18px', fontWeight: '900', backgroundColor: '#00d4ff', color: '#000', borderRadius: '12px 12px 0 0' },
   subLineArea: { display: 'flex', justifyContent: 'space-around', padding: '20px', border: '2px solid #00d4ff', borderTop: 'none', borderRadius: '0 0 12px 12px', gap: '10px' },
   subButton: { flex: 1, padding: '12px', backgroundColor: '#1a1a1a', color: '#00d4ff', border: '1px solid #00d4ff', borderRadius: '8px' },
   subButtonActive: { flex: 1, padding: '12px', backgroundColor: '#00d4ff', color: '#000', borderRadius: '8px', fontWeight: 'bold' },
   setupBox: { width: '100%', maxWidth: '400px', backgroundColor: '#111', padding: '30px', borderRadius: '20px', border: '1px solid #333' },
-  
-  // 修改：這裡的 textAlign: 'left' 會讓內容靠左
   fieldGroup: { marginBottom: '25px', textAlign: 'left', width: '100%' },
   label: { display: 'block', marginBottom: '10px', fontSize: '18px', color: '#ccc', fontWeight: '600' },
-  
-  // 優化：inputMini 寬度固定，textAlign 保持 center 讓輸入數字在框內美觀
   inputMini: { width: '120px', padding: '14px', borderRadius: '10px', border: '2px solid #ffde03', backgroundColor: '#000', color: '#fff', fontSize: '18px', textAlign: 'center', outline: 'none' },
-  
   grid6: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' },
   posBtn: { padding: '12px 5px', borderRadius: '8px', border: '2px solid', color: '#fff', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' },
   backButtonBox: { padding: '12px 25px', backgroundColor: 'transparent', color: '#888', border: '1px solid #444', borderRadius: '10px', fontSize: '15px', cursor: 'pointer' },
