@@ -18,8 +18,17 @@ function App() {
   const [teamNumber, setTeamNumber] = useState("");
   const [isScoutingStarted, setIsScoutingStarted] = useState(false);
 
-  // 徹底清除手機端所有白邊的 CSS 注入
   useEffect(() => {
+    // 1. 強制修正 Meta Tag 防止縮放引起的白邊
+    let meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = 'viewport';
+      document.head.appendChild(meta);
+    }
+    meta.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover';
+
+    // 2. 注入終極防白邊 CSS
     const style = document.createElement("style");
     style.innerHTML = `
       html, body {
@@ -29,9 +38,16 @@ function App() {
         height: 100% !important;
         overflow-x: hidden !important;
         background-color: #000 !important;
+        position: fixed; /* 關鍵：防止 iPhone 橡皮筋回彈露出白底 */
+      }
+      #root {
+        height: 100%;
+        width: 100%;
+        background-color: #000;
       }
       * {
         box-sizing: border-box !important;
+        -webkit-tap-highlight-color: transparent; /* 移除 iOS 點擊高亮 */
       }
     `;
     document.head.appendChild(style);
@@ -55,6 +71,7 @@ function App() {
     return list.includes(teamNumber);
   };
 
+  // 1. 登入頁面
   if (!isLoggedIn) {
     return (
       <div style={styles.container}>
@@ -76,6 +93,7 @@ function App() {
     );
   }
 
+  // 2. 賽區選擇 (保留圖片)
   if (!stage) {
     return (
       <div style={styles.container}>
@@ -105,6 +123,7 @@ function App() {
     );
   }
 
+  // 3. Setup (靠左並縮小格子)
   if (!isScoutingStarted) {
     return (
       <div style={styles.container}>
@@ -179,7 +198,8 @@ const styles = {
     justifyContent: 'center', 
     color: 'white', 
     position: 'relative',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    touchAction: 'pan-y' // 關鍵：禁止左右手勢縮放導致的白邊
   },
   header: { marginBottom: '40px' },
   mainLogoLarge: { width: '180px', height: 'auto', marginBottom: '20px' },
