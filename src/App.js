@@ -3,7 +3,7 @@ import teamLogo from './FRC9427-teamloge.jpg';
 import seasonLogo from './2026FRC-REBUILT-logo.webp'; 
 
 const BOSPHORUS_TEAMS = ["5665", "5773", "5883", "6417", "6431", "6838", "6988", "7632", "7672", "7729", "8169", "8613", "8725", "9001", "9079", "9427", "9441", "9468", "9583", "9610", "10213", "10244", "10261", "10337", "10428", "10911", "10914", "10920", "10932", "11095", "11164", "11166", "11244", "11255", "11266", "11365", "11401"];
-const YEDITEPE_TEAMS = ["2905", "4481", "5553", "6014", "6232", "6417", "6431", "6988", "6989", "7444", "7576", "7632", "7742", "8042", "8058", "8079", "8151", "8169", "8173", "8584", "8613", "8725", "8759", "9079", "9102", "9427", "9519", "9601", "10064", "10216", "10230", "10396", "10907", "11010", "11300"];
+const YEDITEPE_TEAMS = ["2905", "4481", "5553", "6014", "6232", "6417", "6431", "6988", "6989", "7444", "7576", "7632", "7742", "8042", "8058", "8079", "8084", "8151", "8169", "8173", "8584", "8613", "8725", "8759", "9079", "9102", "9427", "9519", "9601", "10064", "10216", "10230", "10396", "10907", "11010", "11300"];
 
 function App() {
   const [password, setPassword] = useState("");
@@ -63,11 +63,8 @@ function App() {
         <div style={styles.brandTitleContainer}><img src={seasonLogo} alt="2026 Logo" style={styles.seasonLogoSmall} /></div>
         <div style={styles.selectionArea}>
           <h2 style={styles.mainSelectionTitle}>REGION SELECTION</h2>
-          
           <div style={styles.accordionBox}>
-            <button onClick={() => setSelectedRegional(selectedRegional === 'Bosphorus' ? null : 'Bosphorus')} style={selectedRegional === 'Bosphorus' ? styles.bigTechButtonActive : styles.bigTechButton}>
-              Bosphorus Regional {selectedRegional === 'Bosphorus' ? '▲' : '▼'}
-            </button>
+            <button onClick={() => setSelectedRegional(selectedRegional === 'Bosphorus' ? null : 'Bosphorus')} style={selectedRegional === 'Bosphorus' ? styles.bigTechButtonActive : styles.bigTechButton}>Bosphorus Regional {selectedRegional === 'Bosphorus' ? '▲' : '▼'}</button>
             {selectedRegional === 'Bosphorus' && (
               <div style={styles.subLineArea}>
                 <button onClick={() => confirmStage('Bosphorus', 'Bosphorus Quals')} style={tempStage === 'Bosphorus Quals' ? styles.subButtonActive : styles.subButton}>Qualifications</button>
@@ -75,11 +72,8 @@ function App() {
               </div>
             )}
           </div>
-
           <div style={styles.accordionBox}>
-            <button onClick={() => setSelectedRegional(selectedRegional === 'Yeditepe' ? null : 'Yeditepe')} style={selectedRegional === 'Yeditepe' ? styles.bigTechButtonActive : styles.bigTechButton}>
-              Yeditepe Regional {selectedRegional === 'Yeditepe' ? '▲' : '▼'}
-            </button>
+            <button onClick={() => setSelectedRegional(selectedRegional === 'Yeditepe' ? null : 'Yeditepe')} style={selectedRegional === 'Yeditepe' ? styles.bigTechButtonActive : styles.bigTechButton}>Yeditepe Regional {selectedRegional === 'Yeditepe' ? '▲' : '▼'}</button>
             {selectedRegional === 'Yeditepe' && (
               <div style={styles.subLineArea}>
                 <button onClick={() => confirmStage('Yeditepe', 'Yeditepe Quals')} style={tempStage === 'Yeditepe Quals' ? styles.subButtonActive : styles.subButton}>Qualifications</button>
@@ -95,13 +89,12 @@ function App() {
   if (!isScoutingStarted) {
     return (
       <div style={styles.container}>
-        <div style={styles.brandTitleContainer}><img src={seasonLogo} alt="2026 Logo" style={styles.seasonLogoSmall} /></div>
         <div style={styles.setupBox}>
-          <h2 style={{color: '#ffde03', fontSize: '28px'}}>{stage} Setup</h2>
+          <h2 style={{color: '#ffde03', fontSize: '28px', marginBottom: '30px'}}>{stage} Setup</h2>
           
           <div style={styles.fieldGroup}>
             <label style={styles.label}>1. Match Number</label>
-            <input type="number" placeholder="Enter Match #" value={matchNumber} onChange={(e)=>setMatchNumber(e.target.value)} style={styles.inputSmall} />
+            <input type="number" placeholder="No." value={matchNumber} onChange={(e)=>setMatchNumber(e.target.value)} style={styles.inputMini} />
           </div>
 
           <div style={styles.fieldGroup}>
@@ -119,8 +112,8 @@ function App() {
 
           <div style={styles.fieldGroup}>
             <label style={styles.label}>3. Team Number</label>
-            <input type="text" placeholder="Enter Team #" value={teamNumber} onChange={(e)=>setTeamNumber(e.target.value)} style={{...styles.inputSmall, borderColor: (teamNumber && !isValidTeam()) ? 'red' : '#ffde03'}} />
-            {teamNumber && !isValidTeam() && <p style={{color: 'red', fontSize: '12px', marginTop: '5px'}}>⚠️ 不在 {selectedRegional} 參賽名單中</p>}
+            <input type="text" placeholder="Team #" value={teamNumber} onChange={(e)=>setTeamNumber(e.target.value)} style={{...styles.inputMini, borderColor: (teamNumber && !isValidTeam()) ? 'red' : '#ffde03'}} />
+            {teamNumber && !isValidTeam() && <p style={{color: 'red', fontSize: '12px', marginTop: '5px'}}>⚠️ 不在名單中</p>}
           </div>
 
           <div style={{marginTop: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px'}}>
@@ -175,9 +168,14 @@ const styles = {
   subButton: { flex: 1, padding: '12px', backgroundColor: '#1a1a1a', color: '#00d4ff', border: '1px solid #00d4ff', borderRadius: '8px' },
   subButtonActive: { flex: 1, padding: '12px', backgroundColor: '#00d4ff', color: '#000', borderRadius: '8px', fontWeight: 'bold' },
   setupBox: { width: '100%', maxWidth: '400px', backgroundColor: '#111', padding: '30px', borderRadius: '20px', border: '1px solid #333' },
-  fieldGroup: { marginBottom: '25px', textAlign: 'left' },
+  
+  // 修改：這裡的 textAlign: 'left' 會讓內容靠左
+  fieldGroup: { marginBottom: '25px', textAlign: 'left', width: '100%' },
   label: { display: 'block', marginBottom: '10px', fontSize: '18px', color: '#ccc', fontWeight: '600' },
-  inputSmall: { width: '100%', padding: '14px', borderRadius: '10px', border: '2px solid #ffde03', backgroundColor: '#000', color: '#fff', fontSize: '18px', outline: 'none' },
+  
+  // 優化：inputMini 寬度固定，textAlign 保持 center 讓輸入數字在框內美觀
+  inputMini: { width: '120px', padding: '14px', borderRadius: '10px', border: '2px solid #ffde03', backgroundColor: '#000', color: '#fff', fontSize: '18px', textAlign: 'center', outline: 'none' },
+  
   grid6: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' },
   posBtn: { padding: '12px 5px', borderRadius: '8px', border: '2px solid', color: '#fff', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' },
   backButtonBox: { padding: '12px 25px', backgroundColor: 'transparent', color: '#888', border: '1px solid #444', borderRadius: '10px', fontSize: '15px', cursor: 'pointer' },
