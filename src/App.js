@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import teamLogo from './FRC9427-teamloge.jpg'; 
 import seasonLogo from './2026FRC-REBUILT-logo.webp'; 
 
+// --- 1. Airtable 配置 ---
+const BASE_ID = "appIA19QV2xnCnjUy"; 
+const TABLE_NAME = "ScoutingData"; 
+const AIRTABLE_PAT = "patxjJjmoumlLjhWt.dbd85ab4683ccf1a3e0d1cb065f444eaf70fd8c5c406c4060648c086994752ac";
+
 const BOSPHORUS_TEAMS = ["5665", "5773", "5883", "6417", "6431", "6838", "6988", "7632", "7672", "7729", "8169", "8613", "8725", "9001", "9079", "9427", "9441", "9468", "9583", "9610", "10213", "10244", "10261", "10337", "10428", "10911", "10914", "10920", "10932", "11095", "11164", "11166", "11244", "11255", "11266", "11365", "11401"];
 const YEDITEPE_TEAMS = ["2905", "4481", "5553", "6014", "6232", "6417", "6431", "6988", "6989", "7444", "7576", "7632", "7742", "8042", "8058", "8079", "8084", "8151", "8169", "8173", "8584", "8613", "8725", "8759", "9079", "9102", "9427", "9519", "9601", "10064", "10216", "10230", "10396", "10907", "11010", "11300"];
 
@@ -47,6 +52,56 @@ function App() {
     document.head.appendChild(style);
   }, []);
 
+  const handleSubmit = async () => {
+    const payload = {
+      fields: {
+        "Match": parseInt(matchNumber),
+        "Team": teamNumber,
+        "Alliance": alliancePos,
+        "AutoLeave": autoLeave ? "YES" : "NO",
+        "AutoCoral": autoCoral,
+        "AutoAlgae": autoAlgae,
+        "TeleopCoral": teleopCoral,
+        "TeleopAlgae": teleopAlgae,
+        "Fouls": foulCount,
+        "Defense": defenseRating,
+        "Climb": climbStatus,
+        "Notes": otherNotes
+      }
+    };
+
+    try {
+      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${AIRTABLE_PAT}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        alert("✅ 數據成功傳送到 Airtable！");
+        // 重置數據
+        setAutoLeave(false);
+        setAutoCoral(0);
+        setAutoAlgae(0);
+        setTeleopCoral(0);
+        setTeleopAlgae(0);
+        setFoulCount(0);
+        setDefenseRating(0);
+        setClimbStatus("None");
+        setOtherNotes("");
+        setIsScoutingStarted(false);
+      } else {
+        const err = await response.json();
+        alert(`❌ 傳送失敗: ${err.error.message}`);
+      }
+    } catch (error) {
+      alert("❌ 網路連線錯誤，請檢查網路！");
+    }
+  };
+
   const handleLogin = () => {
     if (password === "FRC9427") setIsLoggedIn(true);
     else { alert("密碼錯誤！"); setPassword(""); }
@@ -74,7 +129,6 @@ function App() {
     </div>
   );
 
-  // 1. 登入頁面
   if (!isLoggedIn) {
     return (
       <div style={styles.container}>
@@ -106,7 +160,6 @@ function App() {
     );
   }
 
-  // 2. 賽區選擇
   if (!stage) {
     return (
       <div style={styles.container}>
@@ -136,7 +189,6 @@ function App() {
     );
   }
 
-  // 3. Setup (整合防呆機制)
   if (!isScoutingStarted) {
     const isTeamValid = isValidTeam();
     const isTeamEmpty = teamNumber === "";
@@ -148,83 +200,38 @@ function App() {
         <div style={styles.setupBox}>
           <h2 style={{color: '#ffde03', fontSize: '28px', marginBottom: '30px'}}>{stage} Setup</h2>
           
-          {/* 1. Match Number */}
           <div style={styles.fieldGroup}>
             <label style={styles.label}>1. Match Number</label>
-            <input 
-              type="number" 
-              placeholder="Enter Match No." 
-              value={matchNumber} 
-              onChange={(e)=>setMatchNumber(e.target.value)} 
-              style={{
-                ...styles.inputMini, 
-                borderColor: (isMatchEmpty && teamNumber !== "") ? '#ff4d4d' : '#ffde03' 
-              }} 
-            />
-            {isMatchEmpty && teamNumber !== "" && <div style={styles.errorText}>* 必須填寫場次</div>}
+            <input type="number" placeholder="Enter Match No." value={matchNumber} onChange={(e)=>setMatchNumber(e.target.value)} style={{...styles.inputMini, borderColor: (isMatchEmpty && teamNumber !== "") ? '#ff4d4d' : '#ffde03' }} />
           </div>
 
-          {/* 2. Alliance Position */}
           <div style={styles.fieldGroup}>
             <label style={styles.label}>2. Alliance Position</label>
             <div style={styles.grid6}>
               {['Red1', 'Red2', 'Red3', 'Blue1', 'Blue2', 'Blue3'].map(pos => (
-                <button key={pos} onClick={() => setAlliancePos(pos)} style={{
-                  ...styles.posBtn,
-                  backgroundColor: alliancePos === pos ? (pos.includes('Red') ? '#ff4d4d' : '#4d94ff') : '#333',
-                  borderColor: pos.includes('Red') ? '#ff4d4d' : '#4d94ff',
-                  opacity: (alliancePos && alliancePos !== pos) ? 0.5 : 1
-                }}>{pos}</button>
+                <button key={pos} onClick={() => setAlliancePos(pos)} style={{...styles.posBtn, backgroundColor: alliancePos === pos ? (pos.includes('Red') ? '#ff4d4d' : '#4d94ff') : '#333', borderColor: pos.includes('Red') ? '#ff4d4d' : '#4d94ff', opacity: (alliancePos && alliancePos !== pos) ? 0.5 : 1 }}>{pos}</button>
               ))}
             </div>
-            {isPosEmpty && !isTeamEmpty && <div style={styles.errorText}>* 必須選擇位置</div>}
+            {isPosEmpty && !isTeamEmpty && <div style={styles.errorText}>* 必須選擇一個位置</div>}
           </div>
 
-          {/* 3. Team Number */}
           <div style={styles.fieldGroup}>
             <label style={styles.label}>3. Team Number</label>
             <div style={{position: 'relative'}}>
-              <input 
-                type="text" 
-                placeholder="Team #" 
-                value={teamNumber} 
-                onChange={(e)=>setTeamNumber(e.target.value)} 
-                style={{
-                  ...styles.inputMini, 
-                  borderColor: (!isTeamValid && !isTeamEmpty) ? '#ff4d4d' : (isTeamValid ? '#4CAF50' : '#ffde03')
-                }} 
-              />
+              <input type="text" placeholder="Team #" value={teamNumber} onChange={(e)=>setTeamNumber(e.target.value)} style={{...styles.inputMini, borderColor: (!isTeamValid && !isTeamEmpty) ? '#ff4d4d' : (isTeamValid ? '#4CAF50' : '#ffde03')}} />
               {isTeamValid && <span style={{position: 'absolute', right: '15px', top: '15px'}}>✅</span>}
             </div>
-            {!isTeamValid && !isTeamEmpty && (
-              <div style={styles.errorText}>⚠️ 此隊伍不屬於 {selectedRegional} 賽區</div>
-            )}
-            {isTeamEmpty && !isMatchEmpty && <div style={styles.errorText}>* 請輸入參賽隊伍號碼</div>}
+            {!isTeamValid && !isTeamEmpty && <div style={styles.errorText}>⚠️ 該隊伍不屬於此賽區</div>}
           </div>
 
-          <button 
-            disabled={!matchNumber || !alliancePos || !isTeamValid} 
-            onClick={() => setIsScoutingStarted(true)} 
-            style={{
-              ...styles.startButtonLarge, 
-              marginTop:'20px',
-              backgroundColor: (!matchNumber || !alliancePos || !isTeamValid) ? '#444' : '#ffde03',
-              color: (!matchNumber || !alliancePos || !isTeamValid) ? '#888' : '#000',
-              cursor: (!matchNumber || !alliancePos || !isTeamValid) ? 'not-allowed' : 'pointer',
-              width: '100%',
-              borderRadius: '12px'
-            }}
-          >
-            {!matchNumber || !alliancePos || !isTeamValid ? "請完成上方資訊" : "Start Scouting"}
+          <button disabled={!matchNumber || !alliancePos || !isTeamValid} onClick={() => setIsScoutingStarted(true)} style={{...styles.startButtonLarge, marginTop:'20px', backgroundColor: (!matchNumber || !alliancePos || !isTeamValid) ? '#444' : '#ffde03', color: (!matchNumber || !alliancePos || !isTeamValid) ? '#888' : '#000', cursor: (!matchNumber || !alliancePos || !isTeamValid) ? 'not-allowed' : 'pointer', width: '100%', borderRadius: '12px' }}>
+            {!matchNumber || !alliancePos || !isTeamValid ? "請填妥上方資訊" : "Start Scouting"}
           </button>
-          
-          <button onClick={() => {setStage(null); setTempStage(null);}} style={{...styles.backButtonBox, border:'none', marginTop:'15px', width:'100%'}}>← Back to Regions</button>
         </div>
       </div>
     );
   }
 
-  // 4. Scouting Content Area
   return (
     <div style={styles.scoutingPage}>
       <div style={styles.scoutingHeader}>
@@ -232,7 +239,6 @@ function App() {
         <div style={{fontSize:'18px', fontWeight:'700'}}>Match {matchNumber}</div>
         <div style={{color:'#ffde03', fontWeight:'900', fontSize:'20px'}}>Team {teamNumber}</div>
       </div>
-
       <div style={styles.scrollContent}>
         <section style={styles.section}>
           <h3 style={styles.sectionTitle}>--- AUTO ---</h3>
@@ -243,56 +249,38 @@ function App() {
           <Counter label="Auto Coral" value={autoCoral} setter={setAutoCoral} />
           <Counter label="Auto Algae" value={autoAlgae} setter={setAutoAlgae} />
         </section>
-
         <section style={styles.section}>
           <h3 style={styles.sectionTitle}>--- TELEOP ---</h3>
           <Counter label="Teleop Coral" value={teleopCoral} setter={setTeleopCoral} />
           <Counter label="Teleop Algae" value={teleopAlgae} setter={setTeleopAlgae} />
         </section>
-
         <section style={styles.section}>
           <h3 style={styles.sectionTitle}>--- PERFORMANCE ---</h3>
           <Counter label="Fouls (犯規)" value={foulCount} setter={setFoulCount} color="#ff4d4d" />
           <div style={{marginTop:'20px'}}>
-            <label style={styles.inputLabel}>Defense Rating (防守表現 1-5)</label>
+            <label style={styles.inputLabel}>Defense Rating (1-5)</label>
             <div style={styles.ratingGrid}>
               {[1, 2, 3, 4, 5].map(num => (
-                <button key={num} onClick={() => setDefenseRating(num)} style={{
-                  ...styles.ratingBtn,
-                  backgroundColor: defenseRating === num ? '#ffde03' : '#222',
-                  color: defenseRating === num ? '#000' : '#fff'
-                }}>{num}</button>
+                <button key={num} onClick={() => setDefenseRating(num)} style={{...styles.ratingBtn, backgroundColor: defenseRating === num ? '#ffde03' : '#222', color: defenseRating === num ? '#000' : '#fff'}}>{num}</button>
               ))}
             </div>
           </div>
         </section>
-
         <section style={styles.section}>
           <h3 style={styles.sectionTitle}>--- ENDGAME ---</h3>
           <div style={styles.gridClimb}>
             {["None", "Park", "Shallow", "Deep"].map(s => (
-              <button key={s} onClick={() => setClimbStatus(s)} style={{
-                ...styles.climbBtn,
-                backgroundColor: climbStatus === s ? '#ffde03' : '#222',
-                color: climbStatus === s ? '#000' : '#fff'
-              }}>{s}</button>
+              <button key={s} onClick={() => setClimbStatus(s)} style={{...styles.climbBtn, backgroundColor: climbStatus === s ? '#ffde03' : '#222', color: climbStatus === s ? '#000' : '#fff'}}>{s}</button>
             ))}
           </div>
         </section>
-
         <section style={styles.section}>
           <h3 style={styles.sectionTitle}>--- OTHER NOTES ---</h3>
-          <textarea 
-            placeholder="機器出現無法行動、損壞、掉卡或其他特殊狀況..." 
-            value={otherNotes}
-            onChange={(e) => setOtherNotes(e.target.value)}
-            style={styles.textArea}
-          />
+          <textarea placeholder="機器備註..." value={otherNotes} onChange={(e) => setOtherNotes(e.target.value)} style={styles.textArea} />
         </section>
-
         <div style={{padding: '40px 0', display:'flex', flexDirection:'column', gap:'15px'}}>
-          <button style={styles.submitBtn} onClick={() => alert("數據已暫存！")}>Submit Scouting Data</button>
-          <button onClick={() => { if(window.confirm("確定要重置並返回 Setup 嗎？資料將不會被保存。")) setIsScoutingStarted(false) }} style={styles.resetBtn}>← Edit Info (Reset)</button>
+          <button style={styles.submitBtn} onClick={handleSubmit}>Submit Scouting Data</button>
+          <button onClick={() => { if(window.confirm("確定重置？")) setIsScoutingStarted(false) }} style={styles.resetBtn}>← Edit Info (Reset)</button>
         </div>
       </div>
     </div>
