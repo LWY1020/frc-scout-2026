@@ -53,6 +53,7 @@ function App() {
   }, []);
 
   const handleSubmit = async () => {
+    // 這裡的名稱必須與 Airtable 欄位名稱一模一樣
     const payload = {
       fields: {
         "Match": parseInt(matchNumber),
@@ -81,24 +82,15 @@ function App() {
       });
 
       if (response.ok) {
-        alert("✅ 數據成功傳送到 Airtable！");
-        // 重置數據
-        setAutoLeave(false);
-        setAutoCoral(0);
-        setAutoAlgae(0);
-        setTeleopCoral(0);
-        setTeleopAlgae(0);
-        setFoulCount(0);
-        setDefenseRating(0);
-        setClimbStatus("None");
-        setOtherNotes("");
-        setIsScoutingStarted(false);
+        alert("✅ 數據上傳成功！");
+        setIsScoutingStarted(false); // 回到 Setup 頁面
       } else {
         const err = await response.json();
-        alert(`❌ 傳送失敗: ${err.error.message}`);
+        // 這裡會詳細告訴你哪個欄位出錯
+        alert(`❌ 上傳失敗: ${err.error.message}`);
       }
     } catch (error) {
-      alert("❌ 網路連線錯誤，請檢查網路！");
+      alert("❌ 網路連線錯誤！");
     }
   };
 
